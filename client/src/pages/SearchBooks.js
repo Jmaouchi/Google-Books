@@ -29,14 +29,17 @@ const SearchBooks = () => {
     }
 
     try {
+      // use the input field to search the data by calling the function beelow 
       const response = await searchGoogleBooks(searchInput);
 
       if (!response.ok) {
         throw new Error('something went wrong!');
       }
 
+      // save the data the we got in the items variable 
       const { items } = await response.json();
 
+      // loop thru the data and update the state of  searchedBooks { it will save in an array because the data is many objects }
       const bookData = items.map((book) => ({
         bookId: book.id,
         authors: book.volumeInfo.authors || ['No author to display'],
@@ -44,15 +47,18 @@ const SearchBooks = () => {
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
       }));
-
+      
+      // update the state of searchedBooks to hold all the data we got back from the api call
       setSearchedBooks(bookData);
+      // update the input state to empty string
       setSearchInput('');
     } catch (err) {
       console.error(err);
     }
   };
 
-  // create function to handle saving a book to our database
+  // create function to handle saving a book to our database, then we can display it later and check all our saved books 
+  // this will get the data from the state and find the element that has the matching id 
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
