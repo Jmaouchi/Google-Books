@@ -7,6 +7,7 @@ const { signToken } = require('../utils/auth');
 const resolvers = {
   // a query can only retrieve data from the database
   Query: {
+    // get a single user, using the context as a param, 
     me: async (parent, args, context) => {
       if (context.user) {
         const userData = await User.findOne({ _id: context.user._id })
@@ -20,109 +21,48 @@ const resolvers = {
 
     // get all users
     users: async () => {
+      // find all users 
       return User.find()
         .select('-__v -password')
         .populate('savedBooks')
     },
+  
+  },
 
+  Mutation: {
+    // addUser mutation, that will create a new user and return the user data and the token at the same time
+    addUser: async (parent, args) => {
+      const  user = await User.create(args);
+      // take the whole user data object and the secret then encode it using the signToken function, then save it in a variable called token.
+      const token = signToken(user);
 
-    // get a user by username
-    user: async (parent, { username }) => {
-      return User.findOne({ username })
-        .select('-__v -password')
+      // return the token and the user data. 
+      return { token , user}
     },
 
-  //   // get the thoughts query from the typeDefs
-  //   books: async (parent, {}) => {
-  //     const params = username ? { username } : {};
-  //     return Thought.find(params).sort({ createdAt: -1 });
-  //   },
+    login: async (parent, {email , password}) => {
+      // check on the User table for any matching email 
+      const user = await User.findOne({emaill});
+      // if didn't find a matching email, then throw an erro incorrect email
+      if(!user){
+        throw new AuthenticationError('Incorrect email');
+      }
 
-  //   // get a single user by id
-  //   thought: async (parent, { _id }) => {
-  //     return Thought.findOne({ _id });
-  //   },
-    
-  // },
+      // if email is available then  check on the User table for any matching password. befor matching the password, that
+      // password will go thru a function called isCorrectPassword to hash it befor it will make it to the database, with that we
+      // can compare it.  
+      const correctPw = await user.isCorrectPassword(password);
+       // if didn't find a matching email, then throw an erro incorrect email
+      if(!correctPw){
+        throw new AuthenticationError('Incorrect passwrod');
+      }
 
+      const token = signToken(user)
 
-  // mutations to post, delete and update the database
-  // Mutation: {
-  //   addUser: async (parent, args) => {
-  //     const user = await User.create(args);
-  //     const token = signToken(user);
-    
-  //     return { token, user };
-  //   },
+      return {token, user};
+    }
 
-  //   // login mutation
-  //   login: async (parent, { email, password }) => {
-  //     const user = await User.findOne({ email });
     
-  //     if (!user) {
-  //       throw new AuthenticationError('Incorrect credentials');
-  //     }
-    
-  //     const correctPw = await user.isCorrectPassword(password);
-    
-  //     if (!correctPw) {
-  //       throw new AuthenticationError('Incorrect credentials');
-  //     }
-    
-  //     const token = signToken(user);
-  //     return { token, user };
-  //   },
-    
-
-  //   // thoughts mutation
-  //   addThought: async (parent, args, context) => {
-  //     // first we need to check if the user in logged-in
-  //     if (context.user) {
-  //       // if the user is logged-in then create the thought using on the user platform, so with that the thought will belong to the user 
-  //       const thought = await Thought.create({ ...args, username: context.user.username });
-    
-  //       await User.findByIdAndUpdate(
-  //         { _id: context.user._id },
-  //         { $push: { thoughts: thought._id } },
-  //         { new: true }
-  //       );
-    
-  //       return thought;
-  //     }
-    
-  //     throw new AuthenticationError('You need to be logged in!');
-  //   },
-
-  //   //reactions mutation
-  //   addReaction: async (parent, { thoughtId, reactionBody }, context) => {
-  //     if (context.user) {
-  //       const updatedThought = await Thought.findOneAndUpdate(
-  //         { _id: thoughtId },
-  //         { $push: { reactions: { reactionBody, username: context.user.username } } },
-  //         { new: true, runValidators: true }
-  //       );
-    
-  //       return updatedThought;
-  //     }
-    
-  //     throw new AuthenticationError('You need to be logged in!');
-  //   },
-
-  //   // addFriend mutation
-  //   addFriend: async (parent, { friendId }, context) => {
-  //     if (context.user) {
-  //       const updatedThought = await User.findOneAndUpdate(
-  //         { _id: thoughtId },
-  //         { $push: { friends: { friends: friendId} } },
-  //         { new: true, runValidators: true }
-  //       ).populate('friends')
-    
-  //       return addFriend;
-  //     }
-    
-  //     throw new AuthenticationError('You need to be logged in!');
-  //   }
-
   }
 };
 
