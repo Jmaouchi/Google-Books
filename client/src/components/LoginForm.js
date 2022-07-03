@@ -13,6 +13,7 @@ const LoginForm = () => {
   const [login, { error }] = useMutation(LOGIN_USER);
 
   // show an alert if the login infos are not correct
+  // the useEffect will be called straight after the user try to loggin 
   useEffect(() => {
     if (error) {
       setShowAlert(true);
@@ -21,6 +22,7 @@ const LoginForm = () => {
     }
   }, [error]);
 
+  // change the state to hold the user inputs and use them to loggin
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
@@ -37,14 +39,16 @@ const LoginForm = () => {
     }
 
     try {
+      // get the login data (that will return a token and user data object) and save it in a const called data
       const { data } = await login({
+        // use the inputs field
         variables: { ...userFormData }
       });
 
       Auth.login(data.login.token);
 
     } catch (err) {
-      console.error(err);
+      
     }
 
     setUserFormData({
