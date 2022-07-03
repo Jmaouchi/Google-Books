@@ -3,6 +3,7 @@ const { AuthenticationError } = require('apollo-server-express');
 const { signToken } = require('../utils/auth');
 
 
+
 // Resolvers do work in a similar fashion to how a controller file works 
 const resolvers = {
   // a query can only retrieve data from the database
@@ -60,9 +61,31 @@ const resolvers = {
       const token = signToken(user)
 
       return {token, user};
-    }
+    },
 
-    
+
+    saveBook: async (parent, { newBook }, context) => {
+      if (context.user) {
+        const updatedUser = await User.findByIdAndUpdate(
+          { _id: context.user._id },
+          { $push: { savedBooks: newBook }},
+          { new: true }
+        );
+        return updatedUser;
+      }
+      throw new AuthenticationError('You need to be logged in!');
+    },
+    removeBook: async (parent, { bookId }, context) => {
+      if (context.user) {
+        const updatedUser = await User.findByIdAndUpdate(
+          { _id: context.user._id },
+          { $pull: { savedBooks: { bookId }}},
+          { new: true }
+        );
+        return updatedUser;
+      }
+      throw new AuthenticationError('You need to be logged in!');
+    },
   }
 };
 

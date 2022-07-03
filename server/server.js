@@ -1,7 +1,6 @@
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express')
 const path = require('path');
-const routes = require('./routes');
 const db = require('./config/connection');
 
 const { typeDefs, resolvers } = require('./schemas'); // get the queries and mutations from the schema folder
@@ -29,7 +28,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
 }
 
-// app.use(routes); 
+
 
 
 // app.get('*', (req, res) => {

@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, Col, Form, Button, Card, CardColumns } from 'react-bootstrap';
-
 import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../utils/mutations';
 
 const SearchBooks = () => {
-  // create state for holding returned google api data
   const [searchedBooks, setSearchedBooks] = useState([]);
-  // create state for holding our search field data
   const [searchInput, setSearchInput] = useState('');
-
-  // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
-  // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
-  // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
+  const [saveBook, ] = useMutation(SAVE_BOOK);
+
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
   });
 
-  // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
@@ -29,17 +24,16 @@ const SearchBooks = () => {
     }
 
     try {
-      // use the input field to search the data by calling the function beelow 
-      const response = await searchGoogleBooks(searchInput);
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${searchInput}`
+      );
 
       if (!response.ok) {
-        throw new Error('something went wrong!');
+        throw new Error('Something went wrong!');
       }
 
-      // save the data the we got in the items variable 
       const { items } = await response.json();
 
-      // loop thru the data and update the state of  searchedBooks { it will save in an array because the data is many objects }
       const bookData = items.map((book) => ({
         bookId: book.id,
         authors: book.volumeInfo.authors || ['No author to display'],
@@ -47,37 +41,31 @@ const SearchBooks = () => {
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
       }));
-      
-      // update the state of searchedBooks to hold all the data we got back from the api call
+
       setSearchedBooks(bookData);
-      // update the input state to empty string
       setSearchInput('');
     } catch (err) {
       console.error(err);
     }
   };
 
-  // create function to handle saving a book to our database, then we can display it later and check all our saved books 
-  // this will get the data from the state and find the element that has the matching id 
   const handleSaveBook = async (bookId) => {
-    // find the book in `searchedBooks` state by the matching id
+    // map through the data we got from the api call and save the book that has the matching id in a const (bookToSave)
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-
-    // get token
+    // make sure that the user is logged-in and the token is not expired
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
+    // if token is not available or expired then return false
     if (!token) {
       return false;
     }
 
+    // if token is available and not expired, then call the saveBook mutation to save the book data 
     try {
-      const response = await saveBook(bookToSave, token);
+      const { data } = await saveBook({
+        variables: { newBook: { ...bookToSave } },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
       console.error(err);
