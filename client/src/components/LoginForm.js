@@ -12,6 +12,7 @@ const LoginForm = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [login, { error }] = useMutation(LOGIN_USER);
 
+  // show an alert if the login infos are not correct
   useEffect(() => {
     if (error) {
       setShowAlert(true);

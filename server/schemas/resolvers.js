@@ -41,12 +41,14 @@ const resolvers = {
       return { token , user}
     },
 
-    login: async (parent, {email , password}) => {
+
+    login: async (parent, { email , password }) => {
       // check on the User table for any matching email 
-      const user = await User.findOne({emaill});
+      const user = await User.findOne({ email });
+      console.log(email);
       // if didn't find a matching email, then throw an erro incorrect email
       if(!user){
-        throw new AuthenticationError('Incorrect email');
+        throw new AuthenticationError('No user found whith this email');
       }
 
       // if email is available then  check on the User table for any matching password. befor matching the password, that
@@ -75,6 +77,8 @@ const resolvers = {
       }
       throw new AuthenticationError('You need to be logged in!');
     },
+
+
     removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
         const updatedUser = await User.findByIdAndUpdate(
@@ -86,6 +90,14 @@ const resolvers = {
       }
       throw new AuthenticationError('You need to be logged in!');
     },
+
+
+    removeUser: async (parent, { _id }) => {
+        const updatedUser = await User.findOneAndDelete(
+          { _id }
+        );
+        return updatedUser;
+      }
   }
 };
 
