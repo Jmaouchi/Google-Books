@@ -67,10 +67,14 @@ const resolvers = {
 
 
     saveBook: async (parent, { newBook }, context) => {
+      // if user is logged_In
       if (context.user) {
+        // then update the saveBooks field
         const updatedUser = await User.findByIdAndUpdate(
           { _id: context.user._id },
+          // push the newBook data to the saveBooks field, that is available in the User model
           { $push: { savedBooks: newBook }},
+          // return the User data with the new updates
           { new: true }
         );
         return updatedUser;
