@@ -13,6 +13,7 @@ const SearchBooks = () => {
   const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   useEffect(() => {
+    // save all saved books to localStorage
     return () => saveBookIds(savedBookIds);
   });
 
@@ -42,6 +43,7 @@ const SearchBooks = () => {
         image: book.volumeInfo.imageLinks?.thumbnail || '',
       }));
 
+      // update the searchBook state to get all the books data vailable on the state array
       setSearchedBooks(bookData);
       setSearchInput('');
     } catch (err) {
@@ -50,7 +52,9 @@ const SearchBooks = () => {
   };
 
   const handleSaveBook = async (bookId) => {
+    // find the book that has the same id than the provided one
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+    // Checks if there is a saved token and it's still valid
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
     if (!token) {
@@ -59,9 +63,11 @@ const SearchBooks = () => {
 
     try {
       const { data } = await saveBook({
+        // update the user data to contain the saved books
         variables: { newBook: { ...bookToSave } },
       });
 
+      // update the savedBookIds state to containe the saved books and then save these ids to localStorage
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
       console.error(err);
