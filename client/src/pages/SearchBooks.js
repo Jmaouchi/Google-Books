@@ -10,7 +10,7 @@ const SearchBooks = () => {
   const [searchInput, setSearchInput] = useState('');
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
-  const [saveBook, ] = useMutation(SAVE_BOOK);
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
@@ -50,17 +50,13 @@ const SearchBooks = () => {
   };
 
   const handleSaveBook = async (bookId) => {
-    // map through the data we got from the api call and save the book that has the matching id in a const (bookToSave)
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    // make sure that the user is logged-in and the token is not expired
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
-    // if token is not available or expired then return false
     if (!token) {
       return false;
     }
 
-    // if token is available and not expired, then call the saveBook mutation to save the book data 
     try {
       const { data } = await saveBook({
         variables: { newBook: { ...bookToSave } },
