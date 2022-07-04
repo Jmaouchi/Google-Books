@@ -64,7 +64,7 @@ const SearchBooks = () => {
     try {
       const { data } = await saveBook({
         // update the user data to contain the saved books
-        variables: { newBook: { ...bookToSave } },
+        variables: { newBook: { ...bookToSave } }
       });
 
       // update the savedBookIds state to containe the saved books and then save these ids to localStorage
