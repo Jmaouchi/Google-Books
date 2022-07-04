@@ -1,4 +1,4 @@
-#  Google Books search Engine
+#  Google Books Search Engine
 [![License: MIT](https://img.shields.io/github/license/CailinBellWold/Book-Search-Engine?style=plastic)](https://opensource.org/licenses/MIT)
 
 ## Description
