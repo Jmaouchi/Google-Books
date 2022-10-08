@@ -1,7 +1,7 @@
 #  Google Books Search Engine
 [![License: MIT](https://img.shields.io/github/license/CailinBellWold/Book-Search-Engine?style=plastic)](https://opensource.org/licenses/MIT)
 
-## Description
+## Summary
 
 Refactor a fully functioning Google Books API search engine built with a RESTful API as a GraphQL API built with Apollo Server. The original app was built using the MERN stack with a React front end, MongoDB database, and Node.js/Express.js server and API. It was already set up to allow users to save book searches to the back end.
 
@@ -61,7 +61,7 @@ This assignment includes:
 https://whispering-earth-59194.herokuapp.com/
 
 
-# Contact:
+# Contact
 
 * If you have any questions, feel free to [email](mailto:djigo.maouchi@yahoo.com)
 
